@@ -157,10 +157,19 @@ getE_P = () =>{ // returns the difference between the index number of the array 
 }
 
   renderItem = (item) =>{
+    var today= new Date().getDate()
+    var thisyear= new Date().getFullYear()
+    var thismonth= new Date().getMonth()
+    var textcolor= ''
+    if(item.date==today && this.state.viewingMonth==thismonth && this.state.viewingYear==thisyear) {
+      textcolor= '#eeddec'
+    } else {
+      textcolor= '#000'
+    }
     return (
       <TouchableOpacity onPress={()=>{this._toggleModal({item}); console.log(item)}}
       style={{width: '15%', textAlign: 'center', backgroundColor: '#a46cbc'}}>
-      <Text style={{fontSize: 24}}> {item.date} </Text>
+      <Text style={{fontSize: 24, color: textcolor, }}> {item.date} </Text>
       </TouchableOpacity>
     );
   }
