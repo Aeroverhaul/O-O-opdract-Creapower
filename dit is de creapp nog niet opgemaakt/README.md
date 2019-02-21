@@ -1,1 +1,1 @@
-dit is de creapp nog niet opgemaakt
+Repository for the code of our O&O CreaPower project
