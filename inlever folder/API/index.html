@@ -478,7 +478,7 @@
 				top: 50%;
 				left: 50%;
 				margin: 0;
-				transform: translate(-50%, -50%);
+				transform: translate(-50%, -40%);
 				width: auto;
 				height: auto;
 				padding-left: 20px;
@@ -629,7 +629,7 @@
 				<input type="text" value="" id="uid" readonly />
 				<div id="toolTip">
 					<input id="clipBoard" type="image" src="clipBoard.png" onClick="copyUid()" />
-					<span id="toolTipText">Kopieër UID</span>
+					<span id="toolTipText">KopieÃ«r UID</span>
 				</div><br>
 				<button onclick="closeMessage()" style="margin-top: 10px">Ga terug</button>
 			</center>
@@ -927,6 +927,7 @@
 				Genre(s):<br>
 				<select class="genreSlist" size="2"></select><button onclick="removeGenre(0)">Verwijder</button><br>
 				<select class="genreClist"></select><button onclick="addGenre(0)">Voeg toe</button><br>
+				Evenement bescrhijving:<br>
 				<textarea id="cEdescription" placeholder="Evenement beschrijving" rows="8" cols="70"></textarea><br>
 				<button onclick="createEventFunction()">Maak evenement aan</button>
 				<button onclick="closeMessage()">Ga terug</button>
@@ -1209,8 +1210,7 @@
 				<span>Locatie:</span><br>
 				<input type="text" id="sSeLocatie" style="width: 74%" readonly /><br>
 				<span>Genre(s):</span><br>
-				<select class="genreSlist" size="2"></select><button onclick="removeGenre(2)">Verwijder</button><br>
-				<select class="genreClist" width="10%"></select><button onclick="addGenre(2)">Voeg toe</button><br>
+				<select class="genreSlist" size="2"></select><br>
 				<span>Evenement beschrijving:</span><br>
 				<textarea id="sSeDescription" rows="8" cols="70" readonly></textarea>
 			</div><br>
