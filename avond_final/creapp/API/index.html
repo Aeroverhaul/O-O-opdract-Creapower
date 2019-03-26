@@ -1,0 +1,2192 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Login</title>
+		<script src="https://www.gstatic.com/firebasejs/5.0.0/firebase-app.js"></script>
+		<script src="https://www.gstatic.com/firebasejs/5.0.0/firebase-auth.js"></script>
+		<script src="https://www.gstatic.com/firebasejs/5.0.0/firebase-database.js"></script>
+		<script src="./firebase_config.js"></script>
+		<style>
+			html {
+				border-top: solid;
+				border-color: #e49938;
+				border-width: 4px;
+			}
+			body {
+				background-color: #dadada;
+				overflow-x: hidden;
+			}
+			#mask {
+				display: none;
+				background: rgba(0, 0, 0, 0.7);
+				position: fixed;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				left: 0;
+				z-index: 2;
+			}
+			.messageBox {
+				z-index: 2;
+			}
+			#toolTip {
+				position: relative;
+				display: inline-block;
+				border-bottom: 1px dotted black;
+			}
+			#toolTipText {
+				visibility: hidden;
+				width: 120px;
+				background-color: black;
+				color: #fff;
+				text-align: center;
+				padding: 5px 0;
+				border-radius: 6px;
+				position: absolute;
+				z-index: 3;
+			}
+			#toolTip:hover #toolTipText {
+				visibility: visible;
+			}
+			#dropDownBox {
+				position: relative;
+				display: inline-block;
+			}
+			#dropDown-content {
+				display: none;
+				position: absolute;
+				background-color: #707070;
+				min-width: 160px;
+				box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+				z-index: 1;
+			}
+			#btnDropDown {
+				background-color: #707070;
+				color: white;
+				padding: 16px;
+				font-size: 16px;
+				border: none;
+				cursor: pointer;
+			}
+			#dropDown-content div, #dropDown-content a {
+				color: white;
+				padding: 12px 16px;
+				text-decoration: none;
+				display: block;
+				cursor: pointer;
+			}
+			#dropDown-content div:hover, #dropDown-content a:hover {
+				background-color: #505050;
+			}
+			#dropDownBox:hover #dropDown-content {
+				display: block;
+			}
+			#dropDownBox:hover #btnDropDown {
+				background-color: #e49938;
+			}
+			#dropDownBox #dropDown-content .dropDownOption:active {
+				background-color: #e49938;
+			}
+			textarea {
+				resize: none;
+			}
+			table {
+				border-collapse: collapse;
+				background-color: #FFF;
+			}
+			table th {
+				text-align: left;
+				background-color: #3a6070;
+				color: #FFF;
+				padding: 4px 30px 4px 8px;
+			}
+			table td {
+				border: 1px solid #e3e3e3;
+				padding: 4px 8px;
+			}
+			table tr:nth-child(odd) td {
+				background-color: #e7edf0
+			}
+			.genreSlist {
+				width: 20%;
+			}
+			genreSlist option {
+				width: 20%;
+			}
+			
+			
+			#loginDiv {
+				background-color: #ffffff;
+				position: absolute;
+				top: 30%;
+				left: 40%;
+				width: auto;
+				height: auto;
+				padding-left: 20px;
+				padding-right: 20px;
+				padding-top: 10px;
+				padding-bottom: 10px;
+				border: solid;
+				border-color: #e49938;
+				border-width: 4px;
+			}
+			#loginDiv input, #loginDiv button {
+				sdisplay: flex;
+				justify-content: center;
+				margin-top: 5px;
+			}
+			#signUp {
+				margin-left: 5px;
+			}
+			
+			
+			#accountOptions {
+				position: absolute;
+				right: 20px;
+				top: 4px;
+			}
+			#logout {
+				background-color: #707070;
+				color: white;
+				padding: 16px;
+				font-size: 16px;
+				margin-right: 20px;
+				border: none;
+				cursor: pointer;
+			}
+			#logout:hover {
+				background-color: #505050;
+			}
+			#logout:active {
+				background-color: #e49938;
+			}
+			
+			#content {
+				position: relative;
+				top: 125px;
+				left: 5%;
+			}
+			#tabs {
+				background-color: #dadada;
+				width: 90%;
+				height: 48px;
+			}
+			#tabs button {
+				background-color: #707070;
+				float: left;
+				border: none;
+				outline: none;
+				cursor: pointer;
+				padding: 14px 16px;
+				transition: 0.3s;
+				font-size: 17px;
+				margin-right: 1px;
+			}
+			#tabs button:hover {
+				background: #505050;
+			}
+			#tabs button.active {
+				background-color: #e49938;
+			}
+			
+			
+			.tabContent {
+				background-color: #ffffff;
+				position: inherit;
+				width: 90%;
+				height: 400px;
+				border: solid;
+				border-width: 5px;
+				border-color: #e49938;
+				overflow: auto;
+				min-width: 1000px;
+			}
+			
+			#UIDBOX {
+				display: none;
+				background-color: #ffffff;
+				position: absolute;
+				top: 30%;
+				left: 40%;
+				width: auto;
+				height: auto;
+				padding-left: 20px;
+				padding-right: 20px;
+				padding-top: 10px;
+				padding-bottom: 10px;
+				border: solid;
+				border-color: #e49938;
+				border-width: 4px;
+			}
+			#UIDBOX #title {
+				color: black;
+				font-size: 22px;
+				font-weight: bold;
+			}
+			#UIDBOX #uid {
+				font-weight: bold;
+				color: red;
+				font-size: 17px;
+				width: 280px;
+			}
+			#UIDBOX #clipBoard {
+				position: relative;
+				width: 30px;
+				height: 30px;
+				top: 10px;
+			}
+			
+			#changePassword {
+				display: none;
+				background-color: #ffffff;
+				position: absolute;
+				top: 30%;
+				left: 40%;
+				width: auto;
+				height: auto;
+				padding-left: 20px;
+				padding-right: 20px;
+				padding-top: 10px;
+				padding-bottom: 10px;
+				border: solid;
+				border-color: #e49938;
+				border-width: 4px;
+			}
+			#changePassword #title {
+				color: black;
+				font-size: 22px;
+				font-weight: bold;
+			}
+			#changePassword input {
+				margin-top: 3px;
+				margin-bottom: 2px;	
+			}
+			
+			#currentUsingUID {
+				position: relative;
+				width: 100%;
+				height: 25px;
+				font-size: 17px;
+				color: red;
+				font-weight: bold;
+				text-align: center;
+				min-width: 500px;
+			}
+			#special_accountsList {
+				position: relative;
+				width: 50%;
+				min-width: 500px;
+				height: 375px;
+				float: left;
+			}
+			#mngAccountBtn button {
+				border: 2px solid #e49938;
+				width: 50%;
+				min-width: 500px;
+				height: 30px;
+				float: left;
+				color: white;
+				background-color: #707070;
+				cursor: pointer;
+				text-align: center;
+			}
+			#mngAccountBtn button:hover {
+				background-color: #505050;
+			}
+			#mngAccountBtn button:active {
+				background-color: #e49938;
+			}
+			
+			#editDatabaseBtn {
+				width: 50%;
+				float: right;
+			}
+			#editDatabaseBtn button {
+				border: 2px solid #e49938;
+				width: 100%;
+				min-width: 500px;
+				height: 30px;
+				color: white;
+				background-color: #707070;
+				cursor: pointer;
+				text-align: center;
+				display: inline-block;
+				float: right;
+			}
+			#editDatabaseBtn button:hover {
+				background-color: #505050;
+			}
+			#editDatabaseBtn button:active {
+				background-color: #e49938;
+			}
+			#db_content_list{
+				display: inline;
+				width: 50%;
+				min-width: 500px;
+				height: 375px;
+				float: left;
+			}
+			#db_cbbx{
+				width: 50%;
+				float: left;
+				height: 25px;
+				min-width: 500px;
+			}
+			
+			#giveUidBox {
+				display: none;
+				background-color: #ffffff;
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				margin: 0;
+				transform: translate(-50%, -50%);
+				width: auto;
+				height: auto;
+				padding-left: 20px;
+				padding-right: 20px;
+				padding-top: 10px;
+				padding-bottom: 10px;
+				border: solid;
+				border-color: #e49938;
+				border-width: 4px;
+			}
+			#giveUidBox #title {
+				color: black;
+				font-size: 22px;
+				font-weight: bold;
+			}
+			#giveUidBox input {
+				width: 280px;
+				font-size: 17px;
+				font-weight: bold;
+			}
+			#giveUidBox button {
+				margin-top: 3px;
+			}
+			
+			#changeCnBox {
+				display: none;
+				background-color: #ffffff;
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				margin: 0;
+				transform: translate(-50%, -50%);
+				width: auto;
+				height: auto;
+				padding-left: 20px;
+				padding-right: 20px;
+				padding-top: 10px;
+				padding-bottom: 10px;
+				border: solid;
+				border-color: #e49938;
+				border-width: 4px;
+			}
+			#changeCnBox #title {
+				color: black;
+				font-size: 22px;
+				font-weight: bold;
+			}
+			#changeCnBox input {
+				margin-top: 3px;
+				margin-bottom: 2px;	
+			}
+			#uploadJsonBox {
+				display: none;
+				background-color: #ffffff;
+				position: absolute;
+				top: 30%;
+				left: 40%;
+				width: auto;
+				height: auto;
+				padding-left: 20px;
+				padding-right: 20px;
+				padding-top: 10px;
+				padding-bottom: 10px;
+				border: solid;
+				border-color: #e49938;
+				border-width: 4px;
+			}
+			#uploadJsonBox #title {
+				color: black;
+				font-size: 22px;
+				font-weight: bold;
+			}
+			#uploadJsonBox input {
+				margin-top: 3px;
+				margin-bottom: 2px;	
+			}
+			#createEventBox{
+				display: none;
+				background-color: #ffffff;
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				margin: 0;
+				transform: translate(-50%, -50%);
+				width: auto;
+				height: auto;
+				padding-left: 20px;
+				padding-right: 20px;
+				padding-top: 10px;
+				padding-bottom: 10px;
+				border: solid;
+				border-color: #e49938;
+				border-width: 4px;
+			}
+			#createEventBox #title {
+				color: black;
+				font-size: 22px;
+				font-weight: bold;
+			}
+			#createEventBox input {
+				margin-top: 3px;
+				margin-bottom: 2px;	
+			}
+			#editEventBox{
+				display: none;
+				background-color: #ffffff;
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				margin: 0;
+				transform: translate(-50%, -50%);
+				width: auto;
+				height: auto;
+				padding-left: 20px;
+				padding-right: 20px;
+				padding-top: 10px;
+				padding-bottom: 10px;
+				border: solid;
+				border-color: #e49938;
+				border-width: 4px;
+			}
+			#editEventBox #title {
+				color: black;
+				font-size: 22px;
+				font-weight: bold;
+			}
+			#editEventBox input {
+				margin-top: 3px;
+				margin-bottom: 2px;	
+			}
+			#inspectSelectedEventBox{
+				display: none;
+				background-color: #ffffff;
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				margin: 0;
+				transform: translate(-50%, -40%);
+				width: auto;
+				height: auto;
+				padding-left: 20px;
+				padding-right: 20px;
+				padding-top: 10px;
+				padding-bottom: 10px;
+				border: solid;
+				border-color: #e49938;
+				border-width: 4px;
+			}
+			#inspectSelectedEventBox #title {
+				color: black;
+				font-size: 22px;
+				font-weight: bold;
+			}
+			#inspectSelectedEventBox input {
+				margin-top: 3px;
+				margin-bottom: 2px;	
+			}
+			#iSeTbox {
+				width: auto;
+				height: 200px;
+				overflow-x: auto;
+				overflow-y: auto;
+			}
+			#iSeIbox {
+				width: auto;
+				height: auto;
+			}
+			#gModAuthBox{
+				display: none;
+				background-color: #ffffff;
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				margin: 0;
+				transform: translate(-50%, -50%);
+				width: auto;
+				height: auto;
+				padding-left: 20px;
+				padding-right: 20px;
+				padding-top: 10px;
+				padding-bottom: 10px;
+				border: solid;
+				border-color: #e49938;
+				border-width: 4px;
+			}
+			#gModAuthBox #title {
+				color: black;
+				font-size: 22px;
+				font-weight: bold;
+			}
+			#gModAuthBox input {
+				margin-top: 3px;
+				margin-bottom: 2px;	
+			}
+			#editGenresBox{
+				display: none;
+				background-color: #ffffff;
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				margin: 0;
+				transform: translate(-50%, -50%);
+				width: auto;
+				height: auto;
+				padding-left: 20px;
+				padding-right: 20px;
+				padding-top: 10px;
+				padding-bottom: 10px;
+				border: solid;
+				border-color: #e49938;
+				border-width: 4px;
+			}
+			#editGenresBox #title {
+				color: black;
+				font-size: 22px;
+				font-weight: bold;
+			}
+			#editGenresBox input {
+				margin-top: 3px;
+				margin-bottom: 2px;	
+			}
+		</style>
+	</head>
+	<body>
+		<div id="loginPage">
+			<div id="loginDiv">
+				<input id="email" value="" placeholder="E-mailadres"/><br>
+				<input id="pass" value="" type="password" placeholder="Geef je wachtwoord op"/><br>
+				<button id="login">Login</button><button id="signUp">Aanmelden</button>
+			</div>
+		</div>
+		<div id="loggedInPage" style="display: none">
+			<div id="accountOptions">
+				<button id="logout">Log uit</button>
+				<div id="dropDownBox">
+					<button id="btnDropDown">Account opties</button>
+					<div id="dropDown-content">
+						<div class="dropDownOption">
+							<a id="delete">Verwijder account</a>
+						</div>
+						<a class="dropDownOption" onclick="showChangePassword()">Verander wachtwoord</a>
+						<a class="dropDownOption" id="showUid" onclick="showUID()">Laat UID zien</a>
+					</div>
+				</div>
+			</div>
+			
+			<div id="content">
+				<div id="tabs">
+					<button class="tabLink active" onclick="openTab(0)">Bewerk database</button>
+					<button class="tabLink adminOnly" onclick="openTab(1)">Account beheer</button>
+				</div>
+					
+				<div class="tabContent" style="display: block">
+					<div id="editDatabaseBtn">
+						<button id="changeCompanyName" onclick="showChangeCompanyName()">Verander bedrijfsnaam</button>
+						<button id="uploadJson" onclick="showUploadJson()">Upload JSON (advanced)</button>
+						<button onclick="showCreateEventBox()">Maak een nieuw evenement aan</button>
+						<button onclick="deleteSelectedEvent()">Verwijder het geselecteerde evenement</button>
+						<button onclick="showEditSelectedEvent()">Bewerk het geselecteerde evenement</button>
+						<button onclick="showSelectedEventBox()">Inspecteer het geselecteerde evenement</button>
+						<button id ="egenre" onclick="sEditGenres()" style="display: none">Bewerk genre(s)</button>
+					</div>
+					<select id="db_cbbx" onchange="loadDesignatedDatabase(retrieved_database)"></select>					
+					<select id="db_content_list" size="30">
+						
+					</select>
+				</div>
+				<div class="tabContent" style="display: none">
+					<input id="currentUsingUID" type="text" value="NO UID GIVEN" readonly />
+					<select id="special_accountsList" size="30">
+					
+					</select>
+					<div id="mngAccountBtn">
+						<button id="selectUID" onclick="fillSelectedSpAccIn()">selecteer een UID van een van de special accounts</button>
+						<button onclick="showGiveUid()" id="giveUID">Geef een UID op</button>
+						<button id="giveAuthMod">Geef 'Moderator' autoriteit</button>
+						<button id="btnRemoveModAuth">Verwijder 'Moderator' autoriteit</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="mask"></div>
+		<div id="UIDBOX" class="messageBox">
+			<center>
+				<span id="title">UID:</span><br>
+				<input type="text" value="" id="uid" readonly />
+				<div id="toolTip">
+					<input id="clipBoard" type="image" src="clipBoard.png" onClick="copyUid()" />
+					<span id="toolTipText">Kopieër UID</span>
+				</div><br>
+				<button onclick="closeMessage()" style="margin-top: 10px">Ga terug</button>
+			</center>
+		</div>
+		<div id="changePassword" class="messageBox">
+			<center>
+				<span id="title">Verander wachtwoord</span><br>
+				<input type="password" id="currPass" value="" placeholder="Voer uw huidige wachtwoord in" /><br>
+				<input type="password" id="newPass" value="" placeholder="Voer een nieuw wachtwoord in" /><br>
+				<input type="password" id="reNewPass" value="" placeholder="Voer opnieuw het nieuwe wachtwoord in" /><br>
+				<button onclick="cPassword()">Verander</button>
+				<button onclick="closeMessage()">Ga terug</button>
+			</center>
+		</div>
+		<div id="giveUidBox" class="messageBox">
+			<center>
+				<span id="title">Geef UID:<span><br>
+				<input type="text" placeholder="Voer hier de UID in" value="" id="inpGiveUid" /><br>
+				<div id="btnGiveUid">
+					<button id="confirmGivenUid" onclick="fillGivenUidIn()">Bevestig de UID</button>
+					<button onclick="closeMessage()">Ga terug</button>
+				</div>
+			</center>
+		</div>
+		<div id="changeCnBox" class="messageBox">
+			<center>
+				<span id="title">Nieuwe bedrijfsnaam</span><br>
+				<input type="text" id="newCompanyName" placeholder="New company name"></input><br>
+				<button id="btnChangeCompanyName" onclick="changeCompanyName()">Verander</button>
+				<button onclick="closeMessage()">Ga terug</button>
+			</center>
+		</div>
+		<div id="uploadJsonBox" class="messageBox">
+			<center>
+				<span id="title">Upload JSON and push it</span><br>
+				<input type="file" id="selectFiles" value="Import" />
+				<button id="import">Import</button><span id="import_status"></span><br>
+				<button id="upload">Upload JSON</button>
+				<button onclick="closeMessage()">Ga terug</button>
+			</center>
+		</div>
+		<div id="createEventBox" class="messageBox">
+			<center>
+				<span id="title">Maak een nieuw evenement aan</span><br>
+				<input type="text" placeholder="Evenement naam" id="cEname" /><br>
+				Kies een datum<br>
+				<select id="cEyear"></select>
+				<select id="cEmonth">
+					<option value="null">Kies maand</option>
+					<option value="01">01 | Januari</option>
+					<option value="02">02 | Februari</option>
+					<option value="03">03 | Maart</option>
+					<option value="04">04 | April</option>
+					<option value="05">05 | Mei</option>
+					<option value="06">06 | Juni</option>
+					<option value="07">07 | Juli</option>
+					<option value="08">08 | Augustus</option>
+					<option value="09">09 | September</option>
+					<option value="10">10 | Oktober</option>
+					<option value="11">11 | November</option>
+					<option value="12">12 | December</option>
+				</select>
+				<select id="cEday">
+					<option value="null">Kies dag</option>
+					<option value="01">01</option>
+					<option value="02">02</option>
+					<option value="03">03</option>
+					<option value="04">04</option>
+					<option value="05">05</option>
+					<option value="06">06</option>
+					<option value="07">07</option>
+					<option value="08">08</option>
+					<option value="09">09</option>
+					<option value="10">10</option>
+					<option value="11">11</option>
+					<option value="12">12</option>
+					<option value="13">13</option>
+					<option value="14">14</option>
+					<option value="15">15</option>
+					<option value="16">16</option>
+					<option value="17">17</option>
+					<option value="18">18</option>
+					<option value="19">19</option>
+					<option value="20">20</option>
+					<option value="21">21</option>
+					<option value="22">22</option>
+					<option value="23">23</option>
+					<option value="24">24</option>
+					<option value="25">25</option>
+					<option value="26">26</option>
+					<option value="27">27</option>
+					<option value="28">28</option>
+					<option value="29">29</option>
+					<option value="30">30</option>
+					<option value="31">31</option>
+				</select><br>
+				begin tijd - eind tijd<br>
+				<select id="cEsHour">
+					<option value="undefined">N.V.T.</option>
+					<option value="00">00</option>
+					<option value="00">01</option>
+					<option value="00">02</option>
+					<option value="00">03</option>
+					<option value="00">04</option>
+					<option value="00">05</option>
+					<option value="00">06</option>
+					<option value="00">07</option>
+					<option value="00">08</option>
+					<option value="00">09</option>
+					<option value="00">10</option>
+					<option value="00">11</option>
+					<option value="00">12</option>
+					<option value="00">13</option>
+					<option value="00">14</option>
+					<option value="00">15</option>
+					<option value="00">16</option>
+					<option value="00">17</option>
+					<option value="00">18</option>
+					<option value="00">19</option>
+					<option value="00">20</option>
+					<option value="00">21</option>
+					<option value="00">22</option>
+					<option value="00">23</option>
+				</select>
+				<select id="cEsMinute">
+					<option value="undefined">N.V.T.</option>
+					<option value="00">00</option>
+					<option value="00">01</option>
+					<option value="00">02</option>
+					<option value="00">03</option>
+					<option value="00">04</option>
+					<option value="00">05</option>
+					<option value="00">06</option>
+					<option value="00">07</option>
+					<option value="00">08</option>
+					<option value="00">09</option>
+					<option value="00">10</option>
+					<option value="00">11</option>
+					<option value="00">12</option>
+					<option value="00">13</option>
+					<option value="00">14</option>
+					<option value="00">15</option>
+					<option value="00">16</option>
+					<option value="00">17</option>
+					<option value="00">18</option>
+					<option value="00">19</option>
+					<option value="00">20</option>
+					<option value="00">21</option>
+					<option value="00">22</option>
+					<option value="00">23</option>
+					<option value="00">24</option>
+					<option value="00">25</option>
+					<option value="00">26</option>
+					<option value="00">27</option>
+					<option value="00">28</option>
+					<option value="00">29</option>
+					<option value="00">30</option>
+					<option value="00">31</option>
+					<option value="00">32</option>
+					<option value="00">33</option>
+					<option value="00">34</option>
+					<option value="00">35</option>
+					<option value="00">36</option>
+					<option value="00">37</option>
+					<option value="00">38</option>
+					<option value="00">39</option>
+					<option value="00">40</option>
+					<option value="00">41</option>
+					<option value="00">42</option>
+					<option value="00">43</option>
+					<option value="00">44</option>
+					<option value="00">45</option>
+					<option value="00">46</option>
+					<option value="00">47</option>
+					<option value="00">48</option>
+					<option value="00">49</option>
+					<option value="00">50</option>
+					<option value="00">51</option>
+					<option value="00">52</option>
+					<option value="00">53</option>
+					<option value="00">54</option>
+					<option value="00">55</option>
+					<option value="00">56</option>
+					<option value="00">57</option>
+					<option value="00">58</option>
+					<option value="00">59</option>
+				</select>
+				<select id="cEeHour">
+					<option value="undefined">N.V.T.</option>
+					<option value="00">00</option>
+					<option value="00">01</option>
+					<option value="00">02</option>
+					<option value="00">03</option>
+					<option value="00">04</option>
+					<option value="00">05</option>
+					<option value="00">06</option>
+					<option value="00">07</option>
+					<option value="00">08</option>
+					<option value="00">09</option>
+					<option value="00">10</option>
+					<option value="00">11</option>
+					<option value="00">12</option>
+					<option value="00">13</option>
+					<option value="00">14</option>
+					<option value="00">15</option>
+					<option value="00">16</option>
+					<option value="00">17</option>
+					<option value="00">18</option>
+					<option value="00">19</option>
+					<option value="00">20</option>
+					<option value="00">21</option>
+					<option value="00">22</option>
+					<option value="00">23</option>
+				</select>
+				<select id="cEeMinute">
+					<option value="undefined">N.V.T.</option>
+					<option value="00">00</option>
+					<option value="00">01</option>
+					<option value="00">02</option>
+					<option value="00">03</option>
+					<option value="00">04</option>
+					<option value="00">05</option>
+					<option value="00">06</option>
+					<option value="00">07</option>
+					<option value="00">08</option>
+					<option value="00">09</option>
+					<option value="00">10</option>
+					<option value="00">11</option>
+					<option value="00">12</option>
+					<option value="00">13</option>
+					<option value="00">14</option>
+					<option value="00">15</option>
+					<option value="00">16</option>
+					<option value="00">17</option>
+					<option value="00">18</option>
+					<option value="00">19</option>
+					<option value="00">20</option>
+					<option value="00">21</option>
+					<option value="00">22</option>
+					<option value="00">23</option>
+					<option value="00">24</option>
+					<option value="00">25</option>
+					<option value="00">26</option>
+					<option value="00">27</option>
+					<option value="00">28</option>
+					<option value="00">29</option>
+					<option value="00">30</option>
+					<option value="00">31</option>
+					<option value="00">32</option>
+					<option value="00">33</option>
+					<option value="00">34</option>
+					<option value="00">35</option>
+					<option value="00">36</option>
+					<option value="00">37</option>
+					<option value="00">38</option>
+					<option value="00">39</option>
+					<option value="00">40</option>
+					<option value="00">41</option>
+					<option value="00">42</option>
+					<option value="00">43</option>
+					<option value="00">44</option>
+					<option value="00">45</option>
+					<option value="00">46</option>
+					<option value="00">47</option>
+					<option value="00">48</option>
+					<option value="00">49</option>
+					<option value="00">50</option>
+					<option value="00">51</option>
+					<option value="00">52</option>
+					<option value="00">53</option>
+					<option value="00">54</option>
+					<option value="00">55</option>
+					<option value="00">56</option>
+					<option value="00">57</option>
+					<option value="00">58</option>
+					<option value="00">59</option>
+				</select><br>
+				Regio - Locatie<br>
+				<select id="cEregio">
+					<option value="null">Kies een provincie</option>
+					<option value="Groningen">Groningen</option>
+					<option value="Friesland">Friesland</option>
+					<option value="Drenthe">Drenthe</option>
+					<option value="Overijsel">Overijsel</option>
+					<option value="Flevoland">Flevoland</option>
+					<option value="Gelderland">Gelderland</option>
+					<option value="Utrecht">Utrecht</option>
+					<option value="Noord-Holland">Noord-Holland</option>
+					<option value="Zuid-Holland">Zuid-Holland</option>
+					<option value="Zeeland">Zeeland</option>
+					<option value="Noord-Brabant">Noord-Brabant</option>
+					<option value="Limburg">Limburg</option>
+				</select>
+				<input type="text" id="cElocatie" placeholder="locatie" /><br>
+				Genre(s):<br>
+				<select class="genreSlist" size="2"></select><button onclick="removeGenre(0)">Verwijder</button><br>
+				<select class="genreClist"></select><button onclick="addGenre(0)">Voeg toe</button><br>
+				Evenement bescrhijving:<br>
+				<textarea id="cEdescription" placeholder="Evenement beschrijving" rows="8" cols="70"></textarea><br>
+				<button onclick="createEventFunction()">Maak evenement aan</button>
+				<button onclick="closeMessage()">Ga terug</button>
+			</center>
+		</div>
+		<div id="editEventBox" class="messageBox">
+			<center>
+				<span id="title">Bewerk geselecteerde evenement</span><br>
+				<input type="text" placeholder="Evenement naam" id="eEname" /><br>
+				Kies een datum<br>
+				<select id="eEyear"></select>
+				<select id="eEmonth">
+					<option value="null">Kies maand</option>
+					<option value="01">01 | Januari</option>
+					<option value="02">02 | Februari</option>
+					<option value="03">03 | Maart</option>
+					<option value="04">04 | April</option>
+					<option value="05">05 | Mei</option>
+					<option value="06">06 | Juni</option>
+					<option value="07">07 | Juli</option>
+					<option value="08">08 | Augustus</option>
+					<option value="09">09 | September</option>
+					<option value="10">10 | Oktober</option>
+					<option value="11">11 | November</option>
+					<option value="12">12 | December</option>
+				</select>
+				<select id="eEday">
+					<option value="null">Kies dag</option>
+					<option value="01">01</option>
+					<option value="02">02</option>
+					<option value="03">03</option>
+					<option value="04">04</option>
+					<option value="05">05</option>
+					<option value="06">06</option>
+					<option value="07">07</option>
+					<option value="08">08</option>
+					<option value="09">09</option>
+					<option value="10">10</option>
+					<option value="11">11</option>
+					<option value="12">12</option>
+					<option value="13">13</option>
+					<option value="14">14</option>
+					<option value="15">15</option>
+					<option value="16">16</option>
+					<option value="17">17</option>
+					<option value="18">18</option>
+					<option value="19">19</option>
+					<option value="20">20</option>
+					<option value="21">21</option>
+					<option value="22">22</option>
+					<option value="23">23</option>
+					<option value="24">24</option>
+					<option value="25">25</option>
+					<option value="26">26</option>
+					<option value="27">27</option>
+					<option value="28">28</option>
+					<option value="29">29</option>
+					<option value="30">30</option>
+					<option value="31">31</option>
+				</select><br>
+				begin tijd - eind tijd<br>
+				<select id="eEsHour">
+					<option value="undefined">N.V.T.</option>
+					<option value="00">00</option>
+					<option value="00">01</option>
+					<option value="00">02</option>
+					<option value="00">03</option>
+					<option value="00">04</option>
+					<option value="00">05</option>
+					<option value="00">06</option>
+					<option value="00">07</option>
+					<option value="00">08</option>
+					<option value="00">09</option>
+					<option value="00">10</option>
+					<option value="00">11</option>
+					<option value="00">12</option>
+					<option value="00">13</option>
+					<option value="00">14</option>
+					<option value="00">15</option>
+					<option value="00">16</option>
+					<option value="00">17</option>
+					<option value="00">18</option>
+					<option value="00">19</option>
+					<option value="00">20</option>
+					<option value="00">21</option>
+					<option value="00">22</option>
+					<option value="00">23</option>
+				</select>
+				<select id="eEsMinute">
+					<option value="undefined">N.V.T.</option>
+					<option value="00">00</option>
+					<option value="00">01</option>
+					<option value="00">02</option>
+					<option value="00">03</option>
+					<option value="00">04</option>
+					<option value="00">05</option>
+					<option value="00">06</option>
+					<option value="00">07</option>
+					<option value="00">08</option>
+					<option value="00">09</option>
+					<option value="00">10</option>
+					<option value="00">11</option>
+					<option value="00">12</option>
+					<option value="00">13</option>
+					<option value="00">14</option>
+					<option value="00">15</option>
+					<option value="00">16</option>
+					<option value="00">17</option>
+					<option value="00">18</option>
+					<option value="00">19</option>
+					<option value="00">20</option>
+					<option value="00">21</option>
+					<option value="00">22</option>
+					<option value="00">23</option>
+					<option value="00">24</option>
+					<option value="00">25</option>
+					<option value="00">26</option>
+					<option value="00">27</option>
+					<option value="00">28</option>
+					<option value="00">29</option>
+					<option value="00">30</option>
+					<option value="00">31</option>
+					<option value="00">32</option>
+					<option value="00">33</option>
+					<option value="00">34</option>
+					<option value="00">35</option>
+					<option value="00">36</option>
+					<option value="00">37</option>
+					<option value="00">38</option>
+					<option value="00">39</option>
+					<option value="00">40</option>
+					<option value="00">41</option>
+					<option value="00">42</option>
+					<option value="00">43</option>
+					<option value="00">44</option>
+					<option value="00">45</option>
+					<option value="00">46</option>
+					<option value="00">47</option>
+					<option value="00">48</option>
+					<option value="00">49</option>
+					<option value="00">50</option>
+					<option value="00">51</option>
+					<option value="00">52</option>
+					<option value="00">53</option>
+					<option value="00">54</option>
+					<option value="00">55</option>
+					<option value="00">56</option>
+					<option value="00">57</option>
+					<option value="00">58</option>
+					<option value="00">59</option>
+				</select> - 
+				<select id="eEeHour">
+					<option value="undefined">N.V.T.</option>
+					<option value="00">00</option>
+					<option value="00">01</option>
+					<option value="00">02</option>
+					<option value="00">03</option>
+					<option value="00">04</option>
+					<option value="00">05</option>
+					<option value="00">06</option>
+					<option value="00">07</option>
+					<option value="00">08</option>
+					<option value="00">09</option>
+					<option value="00">10</option>
+					<option value="00">11</option>
+					<option value="00">12</option>
+					<option value="00">13</option>
+					<option value="00">14</option>
+					<option value="00">15</option>
+					<option value="00">16</option>
+					<option value="00">17</option>
+					<option value="00">18</option>
+					<option value="00">19</option>
+					<option value="00">20</option>
+					<option value="00">21</option>
+					<option value="00">22</option>
+					<option value="00">23</option>
+				</select>
+				<select id="eEeMinute">
+					<option value="undefined">N.V.T.</option>
+					<option value="00">00</option>
+					<option value="00">01</option>
+					<option value="00">02</option>
+					<option value="00">03</option>
+					<option value="00">04</option>
+					<option value="00">05</option>
+					<option value="00">06</option>
+					<option value="00">07</option>
+					<option value="00">08</option>
+					<option value="00">09</option>
+					<option value="00">10</option>
+					<option value="00">11</option>
+					<option value="00">12</option>
+					<option value="00">13</option>
+					<option value="00">14</option>
+					<option value="00">15</option>
+					<option value="00">16</option>
+					<option value="00">17</option>
+					<option value="00">18</option>
+					<option value="00">19</option>
+					<option value="00">20</option>
+					<option value="00">21</option>
+					<option value="00">22</option>
+					<option value="00">23</option>
+					<option value="00">24</option>
+					<option value="00">25</option>
+					<option value="00">26</option>
+					<option value="00">27</option>
+					<option value="00">28</option>
+					<option value="00">29</option>
+					<option value="00">30</option>
+					<option value="00">31</option>
+					<option value="00">32</option>
+					<option value="00">33</option>
+					<option value="00">34</option>
+					<option value="00">35</option>
+					<option value="00">36</option>
+					<option value="00">37</option>
+					<option value="00">38</option>
+					<option value="00">39</option>
+					<option value="00">40</option>
+					<option value="00">41</option>
+					<option value="00">42</option>
+					<option value="00">43</option>
+					<option value="00">44</option>
+					<option value="00">45</option>
+					<option value="00">46</option>
+					<option value="00">47</option>
+					<option value="00">48</option>
+					<option value="00">49</option>
+					<option value="00">50</option>
+					<option value="00">51</option>
+					<option value="00">52</option>
+					<option value="00">53</option>
+					<option value="00">54</option>
+					<option value="00">55</option>
+					<option value="00">56</option>
+					<option value="00">57</option>
+					<option value="00">58</option>
+					<option value="00">59</option>
+				</select><br>
+				Regio - Locatie<br>
+				<select id="eEregio">
+					<option value="Groningen">Groningen</option>
+					<option value="Friesland">Friesland</option>
+					<option value="Drenthe">Drenthe</option>
+					<option value="Overijsel">Overijsel</option>
+					<option value="Flevoland">Flevoland</option>
+					<option value="Gelderland">Gelderland</option>
+					<option value="Utrecht">Utrecht</option>
+					<option value="Noord-Holland">Noord-Holland</option>
+					<option value="Zuid-Holland">Zuid-Holland</option>
+					<option value="Zeeland">Zeeland</option>
+					<option value="Noord-Brabant">Noord-Brabant</option>
+					<option value="Limburg">Limburg</option>
+				</select>
+				<input type="text" placeholder="Locatie van het evenement" id="eElocatie"><br>
+				Genre(s):<br>
+				<select class="genreSlist" size="2"></select><button onclick="removeGenre(1)">Verwijder</button><br>
+				<select class="genreClist"></select><button onclick="addGenre(1)">Voeg toe</button><br>
+				<textarea id="eEdescription" placeholder="Evenement beschrijving" rows="8" cols="70"></textarea><br>
+				<button onclick="editSelectedEvent()">Bewerk event</button>
+				<button onclick="closeMessage()">Ga terug</button>
+			</center>
+		</div>
+		<div id="inspectSelectedEventBox" class="messageBox">
+			<div id="iSeTbox">
+				<table id="iSeTable"></table>
+			</div>
+			<hr>
+			<div id="iSeIbox">
+				<span>Evenement naam:</span><br>
+				<input type="text" id="sSeName" readonly /><br>
+				<span>Datum:</span><br>
+				<input type="text" id="sSeDate" readonly /><br>
+				<span>Tijd:</span><br>
+				<input type="text" id="sSeStartTime" readonly /> tot <input type="text" id="sSeEndTime" readonly /><br>
+				<span>Provincie:</span><br>
+				<input type="text" id="sSeProvincie" readonly /><br>
+				<span>Locatie:</span><br>
+				<input type="text" id="sSeLocatie" style="width: 74%" readonly /><br>
+				<span>Genre(s):</span><br>
+				<select class="genreSlist" size="2"></select><br>
+				<span>Evenement beschrijving:</span><br>
+				<textarea id="sSeDescription" rows="8" cols="70" readonly></textarea>
+			</div><br>
+			<button onclick="closeMessage()">Ga terug</button>
+		</div>
+		<div id="gModAuthBox" class="messageBox">
+			<center>
+				<span id="title">Maak nieuwe moderator</span>
+				<span>Bedrijf naam</span><br>
+				<input type="text" id="gModAuthCn" placeholder="bedrijf naam"/><br>
+				<button onclick="closeMessage()">Ga terug</button>
+				<button onclick="giveModAuth()">Geef moderator autoriteit</button>
+			</center>
+		</div>
+		<div id="editGenresBox" class="messageBox">
+			<center>
+				<span id="title">Bewerk genre(s)</span><br>
+				Genres<br>
+				<select id="bgenrel" size="2">
+				</select><button onclick="rGenre()">Verwijder genre</button><br>
+				<input type="text" id="newGenreO" placeholder="new genre naam"/><button onclick="aGenre()">Maak genre</button><br>
+				<button onclick="closeMessage()">Ga terug</button>
+				<button onclick="editGenres()">Verander</button>
+			</center>
+		</div>
+		<script>
+			const editGenresBox = document.getElementById("editGenresBox");
+			const bGenreL = document.getElementById("bgenrel");
+			const newGenreO = document.getElementById("newGenreO");
+			function sEditGenres(){
+				editGenresBox.style.display = "block";
+				mask.style.display = "block";
+				newGenreO.value = "";
+				
+				for(let i in bGenreL.options){
+					bGenreL.options[i] = null;
+				}
+				for(let i in retrieved_genres){
+					let opt = document.createElement("OPTION");
+					opt.value = retrieved_genres[i];
+					opt.innerText = retrieved_genres[i];
+					bGenreL.appendChild(opt);
+				}
+			}
+			
+			function editGenres(){
+				// edit the genres
+				var temp = [];
+				var temp2 = bGenreL.options;
+				for(let i = 0; i < temp2.length; i++){
+					let data = temp2[i].innerText;
+					temp.push(data);
+				}
+				
+				firebase.database().ref("genre").set(temp);
+				retrieved_genres = temp;
+				
+				alert("herlaad de pagina om het resultaat te zien");
+				
+				closeMessage();
+			}
+			
+			function rGenre(){
+				bGenreL.options[bGenreL.selectedIndex] = null;
+				// remove selected from bGenreL
+			}
+			
+			function aGenre(){
+				let opt = document.createElement("OPTION");
+				opt.value = newGenreO.value;
+				opt.innerText = newGenreO.value;
+				bGenreL.appendChild(opt);
+				newGenreO.value = "";
+				// add input as option to bGenreL
+			}
+		
+			const genreSlist = document.getElementsByClassName("genreSlist");
+			const genreClist = document.getElementsByClassName("genreClist"); // gets initialized when database is retrieved
+			function addGenre(cei){ // takes the selected of genreClist and adds it to genreSlist
+				let Topt = genreClist[cei].options[genreClist[cei].selectedIndex];
+				let opt = document.createElement("OPTION");
+				opt.value = Topt.value;
+				opt.innerText = Topt.innerText;
+				genreSlist[cei].appendChild(opt);
+			}
+			
+			function removeGenre(cei){// removes selected option form genreSlist
+				genreSlist[cei].options[genreSlist[cei].selectedIndex] = null;
+			}
+			
+			function emptyGenreSlist(cei){
+				// empty the selector genreSlist
+				var length = genreSlist[cei].options.length;
+				for (i = 0; i < length; i++) {
+				  genreSlist[cei].options[i] = null;
+				}
+			}
+			
+			function loadGenreSlist(genres,cei){
+				// empty the selector genreSlist
+				var length = genreSlist[cei].options.length;
+				for (i = 0; i < length; i++) {
+				  genreSlist[cei].options[i] = null;
+				}
+				
+				// fill the selector genreSlist using genres
+				for(let i in genres){
+					let opt = document.createElement("OPTION");
+					opt.innerText = genres[i];
+					opt.value = genres[i];
+					genreSlist[cei].appendChild(opt);
+				}
+			}
+			
+			function getGenreSlist(cei){// returns genreSlist options in ArrayList<String>
+				let g_list = [];
+				for(let i in genreSlist[cei].options){
+					g_list.push(genreSlist[cei].options[i]);
+				}
+				return g_list;
+			}
+			
+			function loadGenre(genres){	// initializes genteClist
+				for(let cei = 0; cei < 3; cei++){
+					// empty the selector genreClist
+					var length = genreClist[cei].options.length;
+					for (i = 0; i < length; i++) {
+					  genreClist[cei].options[i] = null;
+					}
+					
+					// fill the selector genreClist using genres
+					for(let i in genres){
+						let opt = document.createElement("OPTION");
+						opt.innerText = genres[i];
+						opt.value = genres[i];
+						genreClist[cei].appendChild(opt);
+					}
+				}
+			}
+		
+			// function to change tabs
+			function openTab(tabNumber){
+				const tabLinks = document.getElementsByClassName("tabLink");
+				const tabContents = document.getElementsByClassName("tabContent");
+				for(var i = 0; i < tabContents.length; i++){
+					tabContents[i].style.display = "none";
+					tabLinks[i].className = tabLinks[i].className.replace(" active", "");
+				}
+				tabContents[tabNumber].style.display = "block";
+				tabLinks[tabNumber].className += " active";
+			}
+			
+			// function to show uid
+			const mask = document.getElementById("mask");
+			const uidBox = document.getElementById("UIDBOX");
+			const outpUid = document.getElementById("uid");
+			function showUID(){
+				uidBox.style.display = "block";
+				mask.style.display = "block";
+				outpUid.value = firebaseAccount.uid;
+			}
+			
+			// function to show upload json box
+			const uploadJsonBox = document.getElementById("uploadJsonBox");
+			function showUploadJson(){
+				uploadJsonBox.style.display = "block";
+				mask.style.display = "block";
+			}
+			
+			// function to show createEventBox
+			const cEyear = document.getElementById("cEyear");
+			const cEmonth = document.getElementById("cEmonth");
+			const cEday = document.getElementById("cEday");
+			const cEname = document.getElementById("cEname");
+			const cEdescription = document.getElementById("cEdescription");
+			const createEventBox = document.getElementById("createEventBox");
+			const cEsHour = document.getElementById("cEsHour");
+			const cEsMinute = document.getElementById("cEsMinute");
+			const cEeHour = document.getElementById("cEeHour");
+			const cEeMinute = document.getElementById("cEeMinute");
+			const cEregio = document.getElementById("cEregio");
+			const cElocatie = document.getElementById("cElocatie");
+			function showCreateEventBox(){
+				emptyGenreSlist(0);
+				cElocatie.value = "";
+				cEregio.selectedIndex = 0;
+				cEeHour.selectedIndex = 0;
+				cEeMinute.selectedIndex = 0;
+				cEsHour.selectedIndex = 0;
+				cEsMinute.selectedIndex = 0;
+				
+				for(let i in genreSlist[0].options){
+					genreSlist[0].options[i] = null;
+				}
+				
+				cEyear.selectedIndex = 0;
+				cEmonth.selectedIndex = 0;
+				cEday.selectedIndex = 0;
+				cEname.value = "";
+				cEdescription.value = "";
+				const currentYear = new Date().getFullYear();
+				for(var i = cEyear.options.length-1; i >= 0; i--){
+					cEyear.options[i] = null;
+				}
+				
+				var opt = document.createElement('option');
+				opt.value = "null";
+				opt.innerHTML = "Kies jaar";
+				cEyear.appendChild(opt);
+				
+				for(var i = 0; i < 10; i++){
+					opt = document.createElement('option');
+					opt.value = currentYear+i;
+					opt.innerHTML = currentYear+i;
+					cEyear.appendChild(opt);
+				}
+				createEventBox.style.display = "block";
+				mask.style.display = "block";
+			}
+			
+			//function to upload the information in the createEventBox to the database
+			const db_cbbx = document.getElementById("db_cbbx");
+			function createEventFunction(){
+				// get all the information and put them in the right format
+				const timeStamp = cEyear.value+"-"+cEmonth.value+"-"+cEday.value;
+				const eventName = cEname.value;
+				const eventDescription = cEdescription.value;
+				
+				var allow = true;
+				
+				timeStart = null;
+				if(cEsHour.selectedIndex != 0 && cEsMinute.selectedIndex != 0){
+					temp = (`${cEsHour.selectedIndex-1}:${cEsMinute.selectedIndex-1}`).split(":");
+					if(temp[0].length == 1){
+						temp[0] = `0${temp[0]}`;
+					}
+					if(temp[1].length == 1){
+						temp[1] = `0${temp[1]}`;
+					}
+					timeStart = `${temp[0]}:${temp[1]}`;
+				} else {
+					allow = false;
+					alert("Vul beide 'begin tijd' selectors in");
+				}
+				
+				timeEnd = null;
+				if(cEeHour.selectedIndex != 0 && cEeMinute.selectedIndex != 0){
+					temp = (`${cEeHour.selectedIndex-1}:${cEeMinute.selectedIndex-1}`).split(":");
+					if(temp[0].length == 1){
+						temp[0] = `0${temp[0]}`;
+					}
+					if(temp[1].length == 1){
+						temp[1] = `0${temp[1]}`;
+					}
+					timeEnd = `${temp[0]}:${temp[1]}`;
+				} else {
+					if(cEeHour.selectedIndex != 0 || cEeMinute.selectedIndex != 0){
+						alert("Vul beide of geen 'eind tijd' selectors in");
+						allow = false;
+					}
+				}
+				
+				// put the gathered information in the right format as a json object
+				const sid = makeRandomId(20);
+				
+				if(cEregio.selectedIndex == 0){
+					allow = false;
+					alert("Kies een provincie");
+				}
+				if(cElocatie.value.length <= 4){
+					allow = false;
+					alert("Geef een locatie op")
+				}
+				
+				if(allow){
+					var json = {};
+					json[sid] = {
+						date: timeStamp,
+						description: eventDescription,
+						name: eventName,
+						time_start: timeStart,
+						time_end: timeEnd,
+						provincie: cEregio.value,
+						location: cElocatie.value,
+						genre: getGenreSlist(0)
+					};
+					// upload that json object
+					if(db_cbbx.value != "null"){
+						firebase.database().ref("database").child(db_cbbx.value).child("data").update(json);
+						alert("Herlaad de pagina om het resulaat te kunnen zien");
+					} else {
+						alert("Kies een bedrijf");
+					}
+				}
+			}
+			
+			// function to delete the selected event
+			const db_content_list = document.getElementById("db_content_list");
+			function deleteSelectedEvent(){
+				// get the db_folder of the company that holds the event
+				const companyNameSelected = db_cbbx.value;
+				// get the event sid
+				const sidSelected = db_content_list.value;
+				// remove the sid using the gathered information to create the right root
+				if(companyNameSelected != "null" && sidSelected != ""){
+					firebase.database().ref("database").child(companyNameSelected).child("data").child(sidSelected).remove();
+					alert("Herlaad de pagina om het resulaat te kunnen zien");
+				}
+			}
+			
+			// function to show editable box of the selected event
+			const editEventBox = document.getElementById("editEventBox");
+			const eEyear = document.getElementById("eEyear");
+			const eEmonth = document.getElementById("eEmonth");
+			const eEday = document.getElementById("eEday");
+			const eEdescription = document.getElementById("eEdescription");
+			const eEname = document.getElementById("eEname");
+			const eEsHour = document.getElementById("eEsHour");
+			const eEsMinute = document.getElementById("eEsMinute");
+			const eEeHour = document.getElementById("eEeHour");
+			const eEeMinute = document.getElementById("eEeMinute");
+			const eEregio = document.getElementById("eEregio");
+			const eElocatie = document.getElementById("eElocatie");
+			function showEditSelectedEvent(){
+				// get selected event db_folder
+				const selectedCompany = db_cbbx.value;
+				// get selected event sid
+				const selectedSid = db_content_list.value;
+				
+				if(selectedCompany != "null" && selectedSid != ""){ // check if the user selected an event and company
+					// get information from retrieved_database and put it in the editable boxes
+					const currentYear = new Date().getFullYear();
+					const retrieved_timestamp = retrieved_database[selectedCompany]["data"][selectedSid]["date"].split("-");
+					const retrieved_description = retrieved_database[selectedCompany]["data"][selectedSid]["description"];
+					const retrieved_name = retrieved_database[selectedCompany]["data"][selectedSid]["name"];
+					const retrieved_startTime = retrieved_database[selectedCompany]["data"][selectedSid]["time_start"];
+					const retrieved_endTime = retrieved_database[selectedCompany]["data"][selectedSid]["time_end"];
+					const retrieved_location = retrieved_database[selectedCompany]["data"][selectedSid]["location"];
+					const retrieved_genre = retrieved_database[selectedCompany]["data"][selectedSid]["genre"];
+					
+					loadGenreSlist(retrieved_genre,1);
+					
+					for(let i in eEregio.options){
+						if(eEregio.options[i].innerText == retrieved_database[selectedCompany]["data"][selectedSid]["provincie"]){
+							eEregio.selectedIndex = i;
+							break;
+						}
+					}
+					
+					if(retrieved_endTime == undefined){
+						eEeHour.selectedIndex = 0;
+						eEeMinute.selectedIndex = 0;
+					} else {
+						let temp = retrieved_endTime.split(":");
+						eEeHour.selectedIndex = Number(temp[0])+1;
+						eEeMinute.selectedIndex = Number(temp[1])+1;
+					}
+					if(retrieved_startTime == undefined){
+						eEsHour.selectedIndex = 0;
+						eEsMinute.selectedIndex = 0;
+					} else {
+						let temp = retrieved_startTime.split(":");
+						eEsHour.selectedIndex = Number(temp[0])+1;
+						eEsMinute.selectedIndex = Number(temp[1])+1;
+					}
+					
+					for(var i = cEyear.options.length-1; i >= 0; i--){
+						cEyear.options[i] = null;
+					}
+					
+					var opt = document.createElement('option');
+					opt.value = retrieved_timestamp[0];
+					opt.innerHTML = retrieved_timestamp[0];
+					eEyear.appendChild(opt);
+					
+					for(var i = 0; i < 1; i++){
+						opt = document.createElement('option');
+						opt.value = currentYear+i;
+						opt.innerHTML = currentYear+i;
+						eEyear.appendChild(opt);
+					}
+					
+					eEmonth.selectedIndex = retrieved_timestamp[1];
+					eEday.selectedIndex = retrieved_timestamp[2];
+					eEdescription.textContent = retrieved_description;
+					eEname.value = retrieved_name;
+					eElocatie.value = retrieved_location;
+					
+					// make the box visible
+					editEventBox.style.display = "block";
+					mask.style.display = "block";
+				} else {
+					alert("Kies een bedrijf en een evenement");
+				}
+			}
+			
+			// function to edit the selected event
+			function editSelectedEvent(){
+				var allow = true;
+				// take the information from the editSelectedEventBox
+				const timeStamp = eEyear.value+"-"+eEmonth.value+"-"+eEday.value;
+				const desc = eEdescription.textContent;
+				const name = eEname.value;
+				const location = eElocatie.value;
+				// get the selected event db_folder
+				const selectedCompany = db_cbbx.value;
+				// get the selected event sid
+				const selectedSid = db_content_list.value;
+				var timeEnd = null;
+				if(eEeHour.selectedIndex != 0 && eEeMinute.selectedIndex != 0){
+					timeEnd = `${eEeHour.selectedIndex-1}:${eEeMinute.selectedIndex-1}`;
+					let temp = timeEnd.split(":");
+					if(temp[0].length == 1){
+						temp[0] = `0${temp[0]}`;
+					}
+					if(temp[1].length == 1){
+						temp[1] = `0${temp[1]}`;
+					}
+					timeEnd = `${temp[0]}:${temp[1]}`;
+				} else {
+					if(eEeHour.selectedIndex != 0 || eEeMinute.selectedIndex != 0){
+						alert("Vul beide of geen 'eind tijd' selectors in");
+						allow = false;
+					}
+				}
+				var timeStart = null;
+				if(eEsHour.selectedIndex != 0 && eEsMinute.selectedIndex != 0){
+					timeStart = `${eEsHour.selectedIndex-1}:${eEsMinute.selectedIndex-1}`;
+					let temp = timeStart.split(":");
+					if(temp[0].length == 1){
+						temp[0] = `0${temp[0]}`;
+					}
+					if(temp[1].length == 1){
+						temp[1] = `0${temp[1]}`;
+					}
+					timeStart = `${temp[0]}:${temp[1]}`;
+				} else {
+					allow = false;
+					alert("Vul beide 'begin tijd' selectors in");
+				}
+				// update the selected using the gathered information
+				if(allow){
+					firebase.database().ref("database").child(selectedCompany).child("data").child(selectedSid).update({
+						date: timeStamp,
+						name: name,
+						description: desc,
+						time_start: timeStart,
+						time_end: timeEnd,
+						provincie: eEregio.value,
+						location: location,
+						genre: getGenreSlist(1)
+					})
+					alert("Herlaad de pagina om het resulaat te kunnen zien");
+					closeMessage();
+				}
+			}
+			
+			//function to show the change password box
+			const changePassBox = document.getElementById("changePassword");
+			const newPass = document.getElementById("newPass");
+			const repeatNewPass = document.getElementById("reNewPass");
+			const currPass = document.getElementById("currPass");
+			function showChangePassword(){
+				newPass.value = "";
+				repeatNewPass.value = "";
+				currPass.value = "";
+				changePassBox.style.display = "block";
+				mask.style.display = "block";
+			}
+			
+			// function to show the change companyBox
+			const inpCompanyName = document.getElementById("newCompanyName");
+			const changeCnBox = document.getElementById("changeCnBox");
+			function showChangeCompanyName(){
+				inpCompanyName.value = "";
+				changeCnBox.style.display = "block";
+				mask.style.display = "block";
+			}
+			
+			//function to change the users password
+			// TODO: change input type to password and make a checkbox to show or hide the input
+			function cPassword(){
+				const email = firebaseAccount.email;
+				if(newPass.value == repeatNewPass.value && currPass.value != null){
+					reauthenticate(currPass.value).then(()=>{
+						firebase.auth().currentUser.updatePassword(newPass.value);
+					});
+					closeMessage();
+					// show message with successfull
+				} else {
+					// passwords are not the same
+				}
+			}
+			
+			// reauthenticates the user
+			function reauthenticate(currentPassword){
+				var cred = firebase.auth.EmailAuthProvider.credential(firebaseAccount.email, currentPassword);
+				return firebase.auth().currentUser.reauthenticateWithCredential(cred);
+			}
+			
+			// function to close all messageBoxes
+			const messageBoxes = document.getElementsByClassName("messageBox");
+			function closeMessage(){
+				for(var i = 0; i < messageBoxes.length; i++){
+					messageBoxes[i].style.display = "none";
+				}
+				mask.style.display = "none";
+			}
+			
+			// function to copy the uid
+			function copyUid(){
+				const copyText = outpUid;
+				copyText.select();
+				document.execCommand("copy");
+			}
+			
+			// function to show a box where you can give a uid
+			const gUidBox = document.getElementById("giveUidBox");
+			const gFillIn = document.getElementById("inpGiveUid");
+			function showGiveUid(){
+				gFillIn.value = "";
+				mask.style.display = "block";
+				gUidBox.style.display = "block";
+			}
+			
+			//function to put the given uid in currUID
+			const currUID = document.getElementById("currentUsingUID");
+			function fillGivenUidIn(){
+				currUID.value = gFillIn.value;
+				closeMessage();
+			}
+			
+			// function to fill the selected uid
+			const specialAccountsList = document.getElementById("special_accountsList");
+			function fillSelectedSpAccIn(){
+				currUID.value = specialAccountsList.options[specialAccountsList.selectedIndex].value;
+			}
+			
+			// function to show inspectSelectedEventBox
+			const inspectSelectedEventBox = document.getElementById("inspectSelectedEventBox");
+			var iSeTable = document.getElementById("iSeTable");
+			const sSeName = document.getElementById("sSeName");
+			const sSeDate = document.getElementById("sSeDate");
+			const sSeDescription = document.getElementById("sSeDescription");
+			const sSeStartTime = document.getElementById("sSeStartTime");
+			const sSeEndTime = document.getElementById("sSeEndTime");
+			const sSeProvincie = document.getElementById("sSeProvincie");
+			const sSeLocatie = document.getElementById("sSeLocatie");
+			function showSelectedEventBox(){
+				const selectedCompany = db_cbbx.value;
+				const selectedSid = db_content_list.value;
+				if(selectedCompany != "null" && selectedSid != ""){
+					// fetch the information from the database
+					var promise = firebase.database().ref("event_sign_ups").child(selectedCompany).child(selectedSid).once("value", signUpList => {
+						// clear the table
+						var table = document.createElement("TABLE");
+						table.id = "iSeTable";
+						var tableHeader = document.createElement("TR");
+						var thFirstName = document.createElement("TH");
+						thFirstName.textContent = "Voornaam";
+						var thLastNameSuffix = document.createElement("TH");
+						thLastNameSuffix.textContent = "Tussenvoegsel";
+						var thLastName = document.createElement("TH");
+						thLastName.textContent = "Achternaam";
+						var thcity = document.createElement("TH");
+						thcity.textContent = "Woonplaats";
+						var thEmail = document.createElement("TH");
+						thEmail.textContent = "E-Mail";
+						var thDelButton = document.createElement("TH");
+						tableHeader.appendChild(thFirstName);
+						tableHeader.appendChild(thLastName);
+						tableHeader.appendChild(thLastNameSuffix);
+						tableHeader.appendChild(thcity);
+						tableHeader.appendChild(thEmail);
+						tableHeader.appendChild(thDelButton);
+						table.appendChild(tableHeader);
+						
+						if(signUpList.exists()){
+							// run through the list while creating new table tows in the cleared table
+							var entries = Object.entries(signUpList.val());
+							for(var i = 0; i < entries.length; i++){
+								var tableRow = document.createElement("TR");
+								var firstName = document.createElement("TD");
+								firstName.textContent = entries[i][1]["first_name"];
+								var lastName = document.createElement("TD");
+								lastName.textContent = entries[i][1]["last_name"];
+								var city = document.createElement("TD");
+								city.textContent = entries[i][1]["city"];
+								var email = document.createElement("TD");
+								email.textContent = entries[i][1]["email"];
+								var lastNameSuffix = document.createElement("TD");
+								if(entries[i][1].hasOwnProperty("last_name_suffix")){
+									lastNameSuffix.textContent = entries[i][1]["last_name_suffix"];
+								}
+								var btnDeleteSignUp = document.createElement("BUTTON");
+								btnDeleteSignUp.textContent = "Verwijder";
+								var uid = entries[i][0];
+								btnDeleteSignUp.onclick = function(){
+									firebase.database().ref("event_sign_ups").child(selectedCompany).child(selectedSid).child(uid).remove();
+								};
+								tableRow.appendChild(firstName);
+								tableRow.appendChild(lastName);
+								tableRow.appendChild(lastNameSuffix);
+								tableRow.appendChild(city);
+								tableRow.appendChild(email);
+								tableRow.appendChild(btnDeleteSignUp);
+								table.appendChild(tableRow);
+							}
+						}
+						document.getElementById("iSeTbox").innerHTML = null;
+						document.getElementById("iSeTbox").appendChild(table);
+						
+						// collect the information of the selected event
+						const sSeNameV = retrieved_database[selectedCompany]["data"][selectedSid]["name"];
+						const sSeDateV = retrieved_database[selectedCompany]["data"][selectedSid]["date"];
+						const sSeDescriptionV = retrieved_database[selectedCompany]["data"][selectedSid]["description"];
+						const sSeStartTimeV = retrieved_database[selectedCompany]["data"][selectedSid]["time_start"];
+						const sSeProvincieV = retrieved_database[selectedCompany]["data"][selectedSid]["provincie"];
+						const sSeLocatieV = retrieved_database[selectedCompany]["data"][selectedSid]["location"];
+						const genreSlistV = retrieved_database[selectedCompany]["data"][selectedSid]["genre"];
+						var sSeEndTimeV = retrieved_database[selectedCompany]["data"][selectedSid]["time_end"];
+						
+						//if empty statements
+						if(sSeEndTimeV == null){
+							sSeEndTimeV = "N.V.T.";
+						}
+						
+						// put the collected data in their own box
+						sSeName.value = sSeNameV;
+						sSeDate.value = sSeDateV;
+						sSeDescription.textContent = sSeDescriptionV;
+						sSeStartTime.value = sSeStartTimeV;
+						sSeEndTime.value = sSeEndTimeV;
+						sSeProvincie.value = sSeProvincieV;
+						sSeLocatie.value = sSeLocatieV;
+						loadGenreSlist(genreSlistV,2);
+						
+						// make the box visible
+						inspectSelectedEventBox.style.display = "block";
+						mask.style.display = "block";
+					});
+				} else {
+					alert("Kies een bedrijf en evenement");
+				}
+				
+			}
+		
+			// pre-initialized values
+			const btnLogout = document.getElementById("logout");
+			const btnSignUp = document.getElementById("signUp");
+			const btnLogin = document.getElementById("login");
+			const inpEmail = document.getElementById("email");
+			const inpPassword = document.getElementById("pass");
+			const btnDelete = document.getElementById("delete");
+			const btnGiveAuthMod = document.getElementById("giveAuthMod");
+			const inpFutureMod = document.getElementById("futureMod");
+			const inpCompany = document.getElementById("companyName");// shall also be used as db_folder
+			const inpRemoveModAuth = document.getElementById("removeModAuth");
+			const cbxDeleteDb = document.getElementById("dbAsWell");
+			const btnRemoveModAuth = document.getElementById("btnRemoveModAuth");
+			const btnUploadData = document.getElementById("upload");
+			const btnCompanyName = document.getElementById("changeCompanyName");
+			const loginPage = document.getElementById("loginPage");
+			const loggedInPage = document.getElementById("loggedInPage");
+			const eGenre = document.getElementById("egenre");
+			var importedJson = null;
+			var thisAccount = null;
+			var firebaseAccount = null;
+			var retrieved_database = null;
+			var retrieved_genres = null;
+			
+			// add login event
+			btnLogin.addEventListener('click', e =>{
+				const email = inpEmail.value;
+				const pass = inpPassword.value;
+				const auth = firebase.auth();
+				const promise = auth.signInWithEmailAndPassword(email, pass);
+				promise.catch(error => {
+					alert("Verkeerde wachtwoord of email");
+					console.log(error.message);
+				});
+			});
+
+			// add signup event
+			btnSignUp.addEventListener('click', e =>{
+				const email = inpEmail.value;
+				const pass= inpPassword.value;
+				const auth = firebase.auth();
+				const promise1 = auth.createUserWithEmailAndPassword(email, pass);
+				promise1.catch(error => console.log(error.message));
+			});
+
+			// add logout event
+			btnLogout.addEventListener('click', e=>{
+				firebase.auth().signOut();
+				location.reload();
+			});
+			
+			// shows all the options that are only for the admin
+			const adminOnlyOptions = document.getElementsByClassName("adminOnly");
+			function showAdminOnlyOptions(doesShow){
+				for(var i = 0; i < adminOnlyOptions.length; i++){
+					if(doesShow){
+						adminOnlyOptions[i].style.display = "block";
+					} else {
+						adminOnlyOptions[i].style.display = "none";
+					}
+				}
+			}
+			
+			// on account state change (changing account / logging in / logging out)
+			firebase.auth().onAuthStateChanged(firebaseUser =>{
+				if(firebaseUser){
+					//logged in
+
+					//constants
+					const auth = firebase.auth();
+					const uid = auth.currentUser.uid;
+
+					// logs output
+					console.log("you're logged in");
+					console.log(firebaseUser);
+					firebaseAccount = firebaseUser;
+
+					// gets account priveledges
+					firebase.database().ref("special_accounts").child(uid).once("value", account =>{
+						if(account.exists()){
+							loggedInPage.style.display = "block";
+							loginPage.style.display = "none";
+							thisAccount = account.val();
+							if(account.val().isAdmin == true){
+								showAdminOnlyOptions(true);
+								loadSpAccounts();
+								eGenre.style.display = "block";
+							} else {
+								showAdminOnlyOptions(false);
+								eGenre.style.display = "none";
+							}
+							firebase.database().ref("database").once("value", db => {
+								loadDb_cbbx(db.val());
+								loadDesignatedDatabase(db.val());
+								retrieved_database = db.val();
+							});
+							firebase.database().ref("genre").once("value", g => {
+								loadGenre(g.val());
+								retrieved_genres = g.val();
+							});
+						} else {
+							showUID();
+							auth.signOut();
+						}
+					});
+				} else {
+					// logged out
+					
+					//logs output
+					console.log("you're logged out");
+					loggedInPage.style.display = "none";
+					loginPage.style.display = "block";
+					openTab(0);
+				}
+			});
+			
+			// add event to delete the users account
+			btnDelete.addEventListener('click', e=>{
+				if(thisAccount.isModerator){
+					firebase.database().ref("database").child(thisAccount.db_folder).remove();
+				}
+				firebase.database().ref("special_accounts").child(firebase.auth().currentUser.uid).remove();
+				firebase.auth().currentUser.delete();
+			});
+			
+			// give user moderator authority
+			const gModAuthCn = document.getElementById("gModAuthCn");
+			const gModAuthBox = document.getElementById("gModAuthBox");
+			btnGiveAuthMod.addEventListener('click', e =>{
+				// show box
+				gModAuthCn.value = "";
+				gModAuthBox.style.display = "block";
+				mask.style.display = "block";
+			});
+			
+			function giveModAuth(){
+				const uid = currUID.value;
+				const companyName = gModAuthCn.value;
+				console.log("incomplete");
+				if(uid != "NO UID GIVEN"){
+					firebase.database().ref("special_accounts").child(uid).update({
+						isModerator: true,
+						db_folder: companyName
+					});
+					firebase.database().ref("database").child(companyName).update({
+						companyName: companyName,
+						db_folder: companyName
+					});	
+					closeMessage();
+					alert("herlaad de pagina om het resultaat te kunnen zien");
+				} else {
+					alert("Geef eerst een uid op!");
+				}
+			}
+			
+			// change company name
+			function changeCompanyName(){
+				const newCompanyName = inpCompanyName.value;
+				if(db_cbbx.value != "null"){
+					firebase.database().ref("database").child(db_cbbx.value).update({
+						companyName: newCompanyName
+					});
+				} else {
+					alert("Kies een bedrijf");
+				}
+				closeMessage();
+			}
+			
+			// remove users moderator authority
+			btnRemoveModAuth.addEventListener('click', e =>{
+				const uid = currUID.value;
+				firebase.database().ref("special_accounts").child(uid).child("db_folder").once("value", db_folder =>{
+					if(db_folder.exists()){
+						firebase.database().ref("special_accounts").child(uid).update({
+							isModerator: null,
+							db_folder: null
+						});
+						firebase.database().ref("database").child(db_folder.val()).remove();
+						firebase.database().ref("event_sign_ups").child(db_folder.val()).remove();
+					}
+				});
+			});
+			
+			// import a json object into importedJson
+			document.getElementById('import').onclick = function() {
+				var files = document.getElementById('selectFiles').files;
+				if (files.length <= 0) {
+					return false;
+				}
+				  
+				var fr = new FileReader();
+				  
+				fr.onload = function(e){
+					try {
+						var result = JSON.parse(e.target.result);
+						importedJson = result;
+						document.getElementById("import_status").textContent = "Succesfull";
+					} catch(error){
+						importedJson = null;
+						document.getElementById("import_status").textContent = "Failed";
+					}
+				}
+				  
+				fr.readAsText(files.item(0));
+			};
+			
+			// uploads json to the users database
+			btnUploadData.addEventListener('click', e =>{
+				const sid = makeRandomId(20);
+				var json = {};
+				json[sid] = importedJson;
+				firebase.database().ref("database").child(thisAccount.db_folder).child("data").update(json);
+			});
+			
+			// creates and return a random id of 'size' long
+			function makeRandomId(size) {
+				var id = "";
+				var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+				for (var i = 0; i < size; i++){
+					id += possible.charAt(Math.floor(Math.random() * possible.length));
+				}
+
+				return id;
+			}
+			
+			// function that loads all the current special accounts into the selector of the tab manage accounts
+			function loadSpAccounts(){
+				//empty the selector
+				for(var i = specialAccountsList.options.length-1; i >= 0; i--){
+					specialAccountsList.options[i] = null;
+				}
+				
+				//gather all options into an array fo objects
+				var array_list_accounts = [];
+				firebase.database().ref("special_accounts").once("value", list =>{
+					var entries = Object.entries(list.val());
+					for(var i = 0; i < entries.length; i++){
+						var adm = false;
+						var mod = false;
+						var dbf = null;
+						if(typeof entries[i][1].isAdmin !== 'undefined'){
+							adm = entries[i][1].isAdmin;
+						}
+						if(typeof entries[i][1].isModerator !== 'undefined' && typeof entries[i][1].db_folder !== 'undefined'){
+							mod = entries[i][1].isModerator;
+							dbf = entries[i][1].db_folder;
+						}
+						array_list_accounts.push({uid: entries[i][0], isAdmin: adm, isModerator: mod, db_folder: dbf});
+					}
+				});
+				
+				//set all options in the selector
+				setTimeout(()=>{
+					for(var i = 0; i < array_list_accounts.length; i++){
+						var opt = document.createElement('option');
+						opt.value = array_list_accounts[i].uid;
+						if(array_list_accounts[i].isModerator){
+							opt.innerText = array_list_accounts[i].db_folder;
+						} else {
+							opt.innerText = array_list_accounts[i].uid;
+						}
+						if(array_list_accounts[i].isModerator){
+							opt.innerText += " (MODERATOR)";
+						}
+						if(array_list_accounts[i].isAdmin){
+							opt.innerText += " (ADMIN)";
+						}
+						specialAccountsList.appendChild(opt);
+					}
+				}, 1000);
+			}
+			
+			
+			// function that loads the designated Database according to your account
+			function loadDesignatedDatabase(database){
+				//empty the selector
+				var array_list_events = [];
+				for(var i = db_content_list.options.length-1; i >= 0; i--){
+					db_content_list.options[i] = null;
+				}
+				//check if admin else get db_folder and get the list of events from it
+				if(database[db_cbbx.value] != null){
+					var db_folder_list = database[db_cbbx.value].data;
+					// put every event in array_list_events
+					var entries = Object.entries(db_folder_list);
+					for(var i = 0; i < entries.length; i++){
+						array_list_events.push({data: entries[i][1], sid: entries[i][0]});
+					}
+					// put every event in the selector
+					for(var i = 0; i < array_list_events.length; i++){
+						var opt = document.createElement('option');
+						opt.value = array_list_events[i].sid;
+						opt.innerHTML = array_list_events[i].data.name;
+						db_content_list.appendChild(opt);
+					}
+				}
+			}
+			
+			// if admin give each db_folder an option in the combobox with a option all aswell
+			// else make only one option
+			function loadDb_cbbx(database){
+				for(var i = db_cbbx.options.length-1; i >= 0; i--){
+					db_cbbx.options[i] = null;
+				}
+				
+				// show the combobox
+				db_cbbx.style.visibility = "visible";
+				// and load all the option for the comboBox
+				if(thisAccount.isAdmin){ // if admin show all options else you're only moderator and it shows your database
+					// get all db_folder.companyName(s) and put them in a list with a default option as well
+					var array_option_list = [{companyName: "Kies een bedrijf", db_folder: null}]
+					var entries = Object.entries(database);
+					for(var i = 0; i < entries.length; i++){
+						array_option_list.push({companyName: entries[i][1]["companyName"], db_folder: entries[i][0]});
+					}
+					for(var i = 0; i < array_option_list.length; i++){
+						var opt = document.createElement('option');
+						opt.value = array_option_list[i].db_folder;
+						opt.innerHTML = array_option_list[i].companyName;
+						db_cbbx.appendChild(opt);
+					}
+				} else {
+					var opt = document.createElement('option');
+					opt.value = thisAccount.db_folder;
+					opt.innerHTML = database[thisAccount.db_folder].companyName;
+					db_cbbx.appendChild(opt);
+				}
+			}
+		</script>
+	</body>
+</html>
