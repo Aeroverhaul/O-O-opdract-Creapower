@@ -1237,6 +1237,7 @@
 			</center>
 		</div>
 		<script>
+			var retrieved_genres = null;
 			const editGenresBox = document.getElementById("editGenresBox");
 			const bGenreL = document.getElementById("bgenrel");
 			const newGenreO = document.getElementById("newGenreO");
@@ -1244,14 +1245,19 @@
 				editGenresBox.style.display = "block";
 				mask.style.display = "block";
 				newGenreO.value = "";
-				
+			}
+			
+			function loadEditGenres(genres){
 				for(let i in bGenreL.options){
 					bGenreL.options[i] = null;
 				}
-				for(let i in retrieved_genres){
+				
+				console.log(genres);
+				
+				for(let i in genres){
 					let opt = document.createElement("OPTION");
-					opt.value = retrieved_genres[i];
-					opt.innerText = retrieved_genres[i];
+					opt.value = genres[i];
+					opt.innerText = genres[i];
 					bGenreL.appendChild(opt);
 				}
 			}
@@ -1267,6 +1273,7 @@
 				
 				firebase.database().ref("genre").set(temp);
 				retrieved_genres = temp;
+				loadEditGenres(temp);
 				
 				alert("herlaad de pagina om het resultaat te zien");
 				
@@ -1294,7 +1301,18 @@
 				let opt = document.createElement("OPTION");
 				opt.value = Topt.value;
 				opt.innerText = Topt.innerText;
-				genreSlist[cei].appendChild(opt);
+				
+				found = false;
+				for(let i in genreSlist[cei].options){
+					if(genreSlist[cei].options[i].innerText == opt.innerText){
+						found = true;
+						break;
+					}
+				}
+				
+				if(!found){
+					genreSlist[cei].appendChild(opt);
+				}
 			}
 			
 			function removeGenre(cei){// removes selected option form genreSlist
@@ -1328,12 +1346,24 @@
 			function getGenreSlist(cei){// returns genreSlist options in ArrayList<String>
 				let g_list = [];
 				for(let i in genreSlist[cei].options){
-					g_list.push(genreSlist[cei].options[i]);
+					if(genreSlist[cei].options[i] != null){
+						g_list.push(genreSlist[cei].options[i].innerText);
+					}
 				}
+				for(let i in g_list){
+					if(typeof g_list[i] === 'undefined'){
+						g_list[i] = null;
+					}
+				}
+				
+				console.log(g_list);
 				return g_list;
 			}
 			
+			
 			function loadGenre(genres){	// initializes genteClist
+				var retrieved_genres = genres;
+				loadEditGenres(genres);
 				for(let cei = 0; cei < 3; cei++){
 					// empty the selector genreClist
 					var length = genreClist[cei].options.length;
@@ -1501,6 +1531,7 @@
 					if(db_cbbx.value != "null"){
 						firebase.database().ref("database").child(db_cbbx.value).child("data").update(json);
 						alert("Herlaad de pagina om het resulaat te kunnen zien");
+						closeMessage();
 					} else {
 						alert("Kies een bedrijf");
 					}
@@ -1880,7 +1911,6 @@
 			var thisAccount = null;
 			var firebaseAccount = null;
 			var retrieved_database = null;
-			var retrieved_genres = null;
 			
 			// add login event
 			btnLogin.addEventListener('click', e =>{
@@ -1949,14 +1979,13 @@
 								showAdminOnlyOptions(false);
 								eGenre.style.display = "none";
 							}
+							firebase.database().ref("genre").once("value", g => {
+								loadGenre(g.val());
+							});
 							firebase.database().ref("database").once("value", db => {
 								loadDb_cbbx(db.val());
 								loadDesignatedDatabase(db.val());
 								retrieved_database = db.val();
-							});
-							firebase.database().ref("genre").once("value", g => {
-								loadGenre(g.val());
-								retrieved_genres = g.val();
 							});
 						} else {
 							showUID();
